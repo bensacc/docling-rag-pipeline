@@ -35,4 +35,13 @@ SUPPORTED_EXTENSIONS = {
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHUNK_MAX_TOKENS = 512  # target chunk size for retrieval, not the model's hard limit
 
+# Whether to run OCR on PDFs. Defaults to on (correct for scanned PDFs with
+# no real text layer), but OCR is the slowest part of ingestion by far and
+# is wasted work on digitally-born PDFs that already have selectable text
+# (e.g. most modern financial filings). If you know your PDFs are all
+# digitally-born, set DOCLING_PDF_DO_OCR=false for a large speedup.
+# Note: this only affects the PDF pipeline -- plain image files (.png/.jpg/
+# etc.) always get OCR, since it's the only way to extract text from them.
+PDF_DO_OCR = os.environ.get("DOCLING_PDF_DO_OCR", "true").lower() == "true"
+
 client = OpenAI()

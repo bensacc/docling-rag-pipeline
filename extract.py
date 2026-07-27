@@ -1,7 +1,9 @@
 from pathlib import Path
 from dotenv import load_dotenv
 from docling.chunking import HybridChunker
-from docling.document_converter import DocumentConverter
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.transforms.chunker.tokenizer.openai import OpenAITokenizer
 from docling_core.transforms.chunker.base import BaseChunk
 from docling_core.types.doc import DoclingDocument
@@ -12,15 +14,24 @@ from config import (
     EMBEDDING_MODEL,
     CHUNK_MAX_TOKENS,
     SUPPORTED_EXTENSIONS,
+    PDF_DO_OCR,
     client,
 )
 from db import load_db, get_processed_sources
 
 
-def convert_document(path: Path) -> DoclingDocument:
-    # Docling auto-detects the format from the file itself -- this works
-    # for any of SUPPORTED_EXTENSIONS, not just PDFs.
-    converter = DocumentConverter()
+def get_converter() -> DocumentConverter:
+    # Only the PDF pipeline's OCR setting is configurable -- image formats
+    # (.png/.jpg/etc.) always need OCR to extract any text at all, so their
+    # pipeline is left on its default regardless of PDF_DO_OCR.
+    pdf_options = PdfPipelineOptions()
+    pdf_options.do_ocr = PDF_DO_OCR
+    return DocumentConverter(
+        format_options={InputFormat.PDF: PdfFormatOption(pipeline_options=pdf_options)}
+    )
+
+
+def convert_document(path: Path, converter: DocumentConverter) -> DoclingDocument:
     print(f"Converting {path.name} ...")
     result = converter.convert(path)
     return result.document
@@ -62,41 +73,46 @@ def build_index(data_dir: Path):
         print("No new files to process.")
         return
 
+    converter = get_converter()
     chunker = get_chunker()
-    chunk_list = []
+
     for file in files:
-        # convert each supported file to a DoclingDocument
-        doc = convert_document(file)
+        # convert this file to a DoclingDocument
+        doc = convert_document(file, converter)
         print(f"Pages: {doc.num_pages()}")
 
         # chunk the parsed document, using a tokenizer that matches
         # the OpenAI embedding model we'll use later.
         chunks = chunk_document(doc, chunker)
-        print(f"\nChunks: {len(chunks)}")
+        print(f"Chunks: {len(chunks)}")
 
         # create list of chunks, metadata plus raw and contextualized text
-        # we want contextualized text to facilitate the subsequent intreactive query steps
-        for chunk in chunks:
-            chunk_list.append(
-                {
-                    "source": file.name,
-                    "text": chunk.text,
-                    "headings": chunk.meta.headings or [],
-                    "embedding_text": chunker.contextualize(chunk),
-                    "pages": sorted(
-                        {
-                            prov.page_no
-                            for item in chunk.meta.doc_items
-                            for prov in item.prov
-                        }
-                    ),
-                }
-            )
-    # embed chunks along with contextualized metadata
-    embed_chunks(chunk_list, client)
-    # test
-    # chunk_list[0]["embedding"]
-    load_db(chunk_list, db_path)
+        # we want contextualized text to facilitate the subsequent interactive query steps
+        chunk_list = [
+            {
+                "source": file.name,
+                "text": chunk.text,
+                "headings": chunk.meta.headings or [],
+                "embedding_text": chunker.contextualize(chunk),
+                "pages": sorted(
+                    {
+                        prov.page_no
+                        for item in chunk.meta.doc_items
+                        for prov in item.prov
+                    }
+                ),
+            }
+            for chunk in chunks
+        ]
+
+        # embed and commit this file's chunks immediately, rather than
+        # accumulating every file in memory and writing once at the very
+        # end -- so a crash or interruption partway through only costs the
+        # one file in progress, not the whole run, and doesn't hold
+        # everything indexed so far only in RAM.
+        embed_chunks(chunk_list, client)
+        load_db(chunk_list, db_path)
+        print(f"Saved {file.name} ({len(chunk_list)} chunks) to the index.\n")
 
 
 if __name__ == "__main__":

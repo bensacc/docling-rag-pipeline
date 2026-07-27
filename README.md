@@ -137,6 +137,7 @@ default, to keep the dependency footprint (and Docker image size) smaller.
 | `OPENAI_API_KEY`      | Yes      | —                        | Used for both embeddings and answer generation                  |
 | `DOCLING_DATA_DIR`    | No       | this project's `data/`  | Directory containing the documents to index (and where the LanceDB index is stored, as `<dir>/lancedb`) |
 | `OMP_NUM_THREADS`, `MKL_NUM_THREADS` | No (Docker only) | `4` | Caps how many CPU threads PyTorch uses inside the container. Set this to match how many CPUs you've allocated to Docker Desktop (Settings → Resources) for best ingestion performance — without a cap, PyTorch can over-detect the host's full CPU count and slow itself down with thread contention. |
+| `DOCLING_PDF_DO_OCR`  | No       | `true`                  | Whether to run OCR on PDFs. OCR is the slowest part of ingestion by far, and is wasted work on digitally-born PDFs that already have a real text layer (most modern reports/filings). Set to `false` for a large speedup *only* if you know your PDFs aren't scanned images. Doesn't affect plain image files (`.png`/`.jpg`/etc.), which always need OCR regardless of this setting. |
 
 ## Notes on design decisions
 
@@ -149,6 +150,12 @@ default, to keep the dependency footprint (and Docker image size) smaller.
 - **Indexing is incremental**: re-running it only processes files whose
   filenames aren't already recorded in the database, so adding one new file
   to a directory of hundreds doesn't mean reprocessing everything.
+- **Each file is embedded and committed to the database immediately after
+  it's chunked**, rather than accumulating every file in memory and writing
+  once at the very end. This means an interruption partway through a large
+  batch (a crash, a restart, a Streamlit session refresh) only costs the
+  one file in progress — everything already committed stays safely indexed
+  and won't be reprocessed on the next run.
 
 ## Step-by-step install guide (no technical background required)
 
