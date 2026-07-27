@@ -271,7 +271,8 @@ docker compose up --build
 
 A lot of text will scroll by — that's normal. The first time you run this,
 it downloads and installs everything the app needs, which can take several
-minutes. Once it settles down and stops scrolling rapidly, it's ready.
+minutes. Once it settles down and stops scrolling rapidly, the app itself is
+running — but it hasn't looked at your documents yet.
 
 ### 8. Open the app
 
@@ -281,7 +282,12 @@ Open your web browser and go to:
 http://localhost:8501
 ```
 
-You should see the app with a text box to ask questions.
+Opening this page is what actually tells the app to read the documents in
+your `data` folder — you'll see an "Indexing documents..." message while it
+works through them. For a first run with several documents, or large ones,
+this can take a few minutes; the terminal window will keep scrolling with
+progress while it happens. Once it finishes, you'll see the text box to ask
+questions.
 
 ### 9. Stopping the app
 
