@@ -11,15 +11,18 @@ from config import (
     DATA_DIR,
     EMBEDDING_MODEL,
     CHUNK_MAX_TOKENS,
+    SUPPORTED_EXTENSIONS,
     client,
 )
 from db import load_db, get_processed_sources
 
 
-def convert_pdf(pdf_path: Path) -> DoclingDocument:
+def convert_document(path: Path) -> DoclingDocument:
+    # Docling auto-detects the format from the file itself -- this works
+    # for any of SUPPORTED_EXTENSIONS, not just PDFs.
     converter = DocumentConverter()
-    print(f"Converting {pdf_path.name} ...")
-    result = converter.convert(pdf_path)
+    print(f"Converting {path.name} ...")
+    result = converter.convert(path)
     return result.document
 
 
@@ -45,11 +48,16 @@ def embed_chunks(chunk_list: list, client: OpenAI):
 
 
 def build_index(data_dir: Path):
-    # prove Docling conversion works, on the smallest file first.
     db_path = data_dir / "lancedb"
 
     processed = get_processed_sources(db_path)
-    files = [f for f in data_dir.glob("*.pdf") if f.name not in processed]
+    files = [
+        f
+        for f in data_dir.iterdir()
+        if f.is_file()
+        and f.suffix.lower() in SUPPORTED_EXTENSIONS
+        and f.name not in processed
+    ]
     if not files:
         print("No new files to process.")
         return
@@ -57,8 +65,8 @@ def build_index(data_dir: Path):
     chunker = get_chunker()
     chunk_list = []
     for file in files:
-        # convert pdf files to DoclingDocument object/documents
-        doc = convert_pdf(file)
+        # convert each supported file to a DoclingDocument
+        doc = convert_document(file)
         print(f"Pages: {doc.num_pages()}")
 
         # chunk the parsed document, using a tokenizer that matches
