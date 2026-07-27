@@ -136,6 +136,7 @@ default, to keep the dependency footprint (and Docker image size) smaller.
 | -------------------- | -------- | ----------------------- | ---------------------------------------------------------------- |
 | `OPENAI_API_KEY`      | Yes      | —                        | Used for both embeddings and answer generation                  |
 | `DOCLING_DATA_DIR`    | No       | this project's `data/`  | Directory containing the documents to index (and where the LanceDB index is stored, as `<dir>/lancedb`) |
+| `OMP_NUM_THREADS`, `MKL_NUM_THREADS` | No (Docker only) | `4` | Caps how many CPU threads PyTorch uses inside the container. Set this to match how many CPUs you've allocated to Docker Desktop (Settings → Resources) for best ingestion performance — without a cap, PyTorch can over-detect the host's full CPU count and slow itself down with thread contention. |
 
 ## Notes on design decisions
 
