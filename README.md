@@ -152,11 +152,10 @@ default, to keep the dependency footprint (and Docker image size) smaller.
 ## Step-by-step install guide (no technical background required)
 
 This walks through everything from scratch — you don't need to know how to
-code. You will need to type a couple of commands into a program called
-**Terminal** (Mac) — that's unavoidable, but every command you need is given
-below to copy and paste exactly as written. This guide assumes a Mac; the
-steps are similar on Windows, but program names differ (Command Prompt or
-PowerShell instead of Terminal, File Explorer instead of Finder).
+code. You will need to type a couple of commands into a command-line program
+(**Terminal** on Mac, **Command Prompt** on Windows) — that's unavoidable,
+but every command you need is given below to copy and paste exactly as
+written. Steps below are labeled **Mac** / **Windows** wherever they differ.
 
 Budget about 20-30 minutes for first-time setup, most of it waiting for
 downloads.
@@ -164,12 +163,15 @@ downloads.
 ### 1. Install Docker Desktop
 
 Docker is the program that runs this app without you needing to install
-Python or any other developer tools yourself.
+Python or any other developer tools yourself. Same for both operating
+systems:
 
 1. Go to [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)
-   and download Docker Desktop for your computer.
-2. Install it like any other application (open the downloaded file, drag it
-   to Applications, etc.).
+   and download Docker Desktop for your computer (it'll detect Mac vs.
+   Windows automatically).
+2. Install it like any other application (Mac: open the downloaded file and
+   drag it to Applications; Windows: run the downloaded installer and
+   follow the prompts — it may ask to restart your computer).
 3. Open Docker Desktop and wait for it to say it's running. **Leave it open**
    in the background — the app won't work if Docker Desktop is closed.
 
@@ -180,7 +182,7 @@ is separate from a ChatGPT subscription — it's billed per use, based on how
 much you actually ask it to do (check current pricing at
 [platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing);
 for personal use, indexing and asking questions typically costs a small
-fraction of a dollar per session).
+fraction of a dollar per session). Same steps on both operating systems:
 
 1. Go to [platform.openai.com](https://platform.openai.com) and sign up or
    log in.
@@ -194,30 +196,55 @@ fraction of a dollar per session).
 
 ### 3. Download this project
 
+Same steps on both operating systems:
+
 1. Go to this project's GitHub page.
 2. Click the green **Code** button, then **Download ZIP**.
 3. Find the downloaded ZIP file (usually in your Downloads folder) and
    double-click it to unzip it.
 4. Move the resulting folder somewhere you'll remember, e.g. your Desktop.
 
-### 4. Open Terminal and navigate to the folder
+### 4. Open a command line and navigate to the folder
+
+**Mac:**
 
 1. Press `Cmd + Space` to open Spotlight, type `Terminal`, and press Enter.
 2. Type `cd ` (with a trailing space), then drag the project folder from
    Finder directly into the Terminal window — this automatically fills in
    the correct path. Press Enter.
 
+**Windows:**
+
+1. Click the Start menu, type `Command Prompt`, and press Enter.
+2. Type `cd ` (with a trailing space), then drag the project folder from
+   File Explorer directly into the Command Prompt window to fill in the
+   path automatically. Press Enter.
+
 ### 5. Add your API key
 
-In the Terminal window (still in the project folder), paste this command
-and press Enter:
+In the command-line window (still in the project folder):
+
+**Mac** — paste and press Enter:
 
 ```
 cp .env.example .env
 ```
 
-Now open the new `.env` file in a plain text editor (in Finder, right-click
-it → **Open With** → **TextEdit**). It contains one line:
+**Windows** — paste and press Enter:
+
+```
+copy .env.example .env
+```
+
+Now open the new `.env` file in a plain text editor. On Mac: in Finder,
+right-click it → **Open With** → **TextEdit**. On Windows: in File Explorer,
+right-click it → **Open with** → **Notepad**.
+
+(Mac note: files starting with a `.` are hidden by Finder by default — press
+`Cmd + Shift + .` to reveal them if you don't see `.env` or `.env.example`.
+Windows shows these files normally, no extra step needed.)
+
+The file contains one line:
 
 ```
 OPENAI_API_KEY=
@@ -228,13 +255,15 @@ then save and close the file.
 
 ### 6. Add your documents
 
-Open the project folder in Finder and find the `data` folder inside it.
-Drag and drop whatever PDFs, Word documents, PowerPoint files, spreadsheets,
-or similar files you want to ask questions about into that folder.
+Open the project folder (Finder on Mac, File Explorer on Windows) and find
+the `data` folder inside it. Drag and drop whatever PDFs, Word documents,
+PowerPoint files, spreadsheets, or similar files you want to ask questions
+about into that folder.
 
 ### 7. Start the app
 
-Make sure Docker Desktop (from step 1) is open, then back in Terminal, run:
+Make sure Docker Desktop (from step 1) is open, then back in your
+command-line window, run:
 
 ```
 docker compose up --build
@@ -256,8 +285,8 @@ You should see the app with a text box to ask questions.
 
 ### 9. Stopping the app
 
-Go back to the Terminal window and press `Control + C`. You can start it
-again anytime by repeating step 7 (it'll be much faster the second time).
+Go back to the command-line window and press `Control + C`. You can start
+it again anytime by repeating step 7 (it'll be much faster the second time).
 
 ### 10. Adding more documents later
 
