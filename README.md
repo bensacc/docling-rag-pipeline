@@ -255,10 +255,10 @@ then save and close the file.
 
 ### 6. Add your documents
 
-Open the project folder (Finder on Mac, File Explorer on Windows) and find
-the `data` folder inside it. Drag and drop whatever PDFs, Word documents,
-PowerPoint files, spreadsheets, or similar files you want to ask questions
-about into that folder.
+Open the project folder (Finder on Mac, File Explorer on Windows). There's
+no `data` folder yet — create a new folder here and name it exactly `data`.
+Then drag and drop whatever PDFs, Word documents, PowerPoint files,
+spreadsheets, or similar files you want to ask questions about into it.
 
 ### 7. Start the app
 
