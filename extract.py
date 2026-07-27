@@ -13,7 +13,7 @@ from config import (
     CHUNK_MAX_TOKENS,
     client,
 )
-from db import load_db
+from db import load_db, get_processed_sources
 
 
 def convert_pdf(pdf_path: Path) -> DoclingDocument:
@@ -44,9 +44,15 @@ def embed_chunks(chunk_list: list, client: OpenAI):
             chunk_dict["embedding"] = item.embedding
 
 
-def main():
+def build_index(data_dir: Path):
     # prove Docling conversion works, on the smallest file first.
-    files = DATA_DIR.glob("*.pdf")
+    db_path = data_dir / "lancedb"
+
+    processed = get_processed_sources(db_path)
+    files = [f for f in data_dir.glob("*.pdf") if f.name not in processed]
+    if not files:
+        print("No new files to process.")
+        return
 
     chunker = get_chunker()
     chunk_list = []
@@ -82,8 +88,8 @@ def main():
     embed_chunks(chunk_list, client)
     # test
     # chunk_list[0]["embedding"]
-    load_db(chunk_list)
+    load_db(chunk_list, db_path)
 
 
 if __name__ == "__main__":
-    main()
+    build_index(DATA_DIR)
