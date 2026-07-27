@@ -148,3 +148,120 @@ default, to keep the dependency footprint (and Docker image size) smaller.
 - **Indexing is incremental**: re-running it only processes files whose
   filenames aren't already recorded in the database, so adding one new file
   to a directory of hundreds doesn't mean reprocessing everything.
+
+## Step-by-step install guide (no technical background required)
+
+This walks through everything from scratch — you don't need to know how to
+code. You will need to type a couple of commands into a program called
+**Terminal** (Mac) — that's unavoidable, but every command you need is given
+below to copy and paste exactly as written. This guide assumes a Mac; the
+steps are similar on Windows, but program names differ (Command Prompt or
+PowerShell instead of Terminal, File Explorer instead of Finder).
+
+Budget about 20-30 minutes for first-time setup, most of it waiting for
+downloads.
+
+### 1. Install Docker Desktop
+
+Docker is the program that runs this app without you needing to install
+Python or any other developer tools yourself.
+
+1. Go to [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/)
+   and download Docker Desktop for your computer.
+2. Install it like any other application (open the downloaded file, drag it
+   to Applications, etc.).
+3. Open Docker Desktop and wait for it to say it's running. **Leave it open**
+   in the background — the app won't work if Docker Desktop is closed.
+
+### 2. Get an OpenAI API key
+
+This app uses OpenAI to understand your documents and answer questions. This
+is separate from a ChatGPT subscription — it's billed per use, based on how
+much you actually ask it to do (check current pricing at
+[platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing);
+for personal use, indexing and asking questions typically costs a small
+fraction of a dollar per session).
+
+1. Go to [platform.openai.com](https://platform.openai.com) and sign up or
+   log in.
+2. Add a payment method under **Settings → Billing** (required before the
+   API will work).
+3. Go to **API keys** (under Settings, or directly at
+   [platform.openai.com/api-keys](https://platform.openai.com/api-keys)) and
+   click **Create new secret key**.
+4. Copy the key immediately and paste it somewhere safe (like a notes app) —
+   OpenAI only shows it to you once.
+
+### 3. Download this project
+
+1. Go to this project's GitHub page.
+2. Click the green **Code** button, then **Download ZIP**.
+3. Find the downloaded ZIP file (usually in your Downloads folder) and
+   double-click it to unzip it.
+4. Move the resulting folder somewhere you'll remember, e.g. your Desktop.
+
+### 4. Open Terminal and navigate to the folder
+
+1. Press `Cmd + Space` to open Spotlight, type `Terminal`, and press Enter.
+2. Type `cd ` (with a trailing space), then drag the project folder from
+   Finder directly into the Terminal window — this automatically fills in
+   the correct path. Press Enter.
+
+### 5. Add your API key
+
+In the Terminal window (still in the project folder), paste this command
+and press Enter:
+
+```
+cp .env.example .env
+```
+
+Now open the new `.env` file in a plain text editor (in Finder, right-click
+it → **Open With** → **TextEdit**). It contains one line:
+
+```
+OPENAI_API_KEY=
+```
+
+Paste your API key from step 2 right after the `=` (no spaces, no quotes),
+then save and close the file.
+
+### 6. Add your documents
+
+Open the project folder in Finder and find the `data` folder inside it.
+Drag and drop whatever PDFs, Word documents, PowerPoint files, spreadsheets,
+or similar files you want to ask questions about into that folder.
+
+### 7. Start the app
+
+Make sure Docker Desktop (from step 1) is open, then back in Terminal, run:
+
+```
+docker compose up --build
+```
+
+A lot of text will scroll by — that's normal. The first time you run this,
+it downloads and installs everything the app needs, which can take several
+minutes. Once it settles down and stops scrolling rapidly, it's ready.
+
+### 8. Open the app
+
+Open your web browser and go to:
+
+```
+http://localhost:8501
+```
+
+You should see the app with a text box to ask questions.
+
+### 9. Stopping the app
+
+Go back to the Terminal window and press `Control + C`. You can start it
+again anytime by repeating step 7 (it'll be much faster the second time).
+
+### 10. Adding more documents later
+
+Drag new files into the `data` folder, then either click **Check for new
+files** in the app's sidebar, or just stop and restart the app (step 7 then
+8). Only the new files get processed — everything already indexed is left
+alone.
